@@ -50,22 +50,18 @@ function parseLine(str){
         }
     }
  }
- function addWordsToDict(neg, pos, words){
-    let obj = {n: neg, p: pos};
+ function addWordsToDict(pos, neg, words){
+    let obj = {p: pos, n: neg};
     for(let i = 0, len = words.length; i < len; i++)
         addWordToDict(obj, words[i].split('#'));
  }
  function addWordToDict(obj, wordData){
     let word = wordData[0];
-    let ind = wordData[1]-1; //make it more like array indexing
+    let ind = wordData[1];
     if(!wordNetDict[word])
         wordNetDict[word]={};
     if(!wordNetDict[word][ind])
-        wordNetDict[word][ind]=obj;         
-    else if(wordNetDict[word][ind].constructor!==Array){
-        let firstObj = wordNetDict[word][ind];
-        wordNetDict[word][ind]=[firstObj, obj];
-    }
+        wordNetDict[word][ind]=[obj];         
     else
         wordNetDict[word][ind].push(obj);
  }
