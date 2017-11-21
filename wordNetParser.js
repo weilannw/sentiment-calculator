@@ -9,7 +9,6 @@
  *     2010. <http://wordnet.princeton.edu>
  */
 var fs = require('fs');
-var readline = require('readline');
 const READFILE = 'SentiWordNet_3.0.0_20130122.txt';
 const WRITEFILE = 'sentiWordNet.json';
 const STARTLINEIND = 885;
