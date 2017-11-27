@@ -1,4 +1,3 @@
-while(1);
 var s = require('./sentiment');
 var stdin = process.stdin;
 var stdout = process.stdout;
