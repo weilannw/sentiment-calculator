@@ -8,40 +8,54 @@
  */
 var wordNet = require('./sentiWordNet.json');
 exports.charLimit = null;
-/*removes characters and whitespace from a sentence*/
+/* removes characters and whitespace from a sentence, gets posScore*/
 function evaluateSentence(sentence){
-    var s = sentence;
+    if(typeof(sentence)!='string') return -2;
+    var s = sentence.toLowerCase();
     let words = s.split(/[ ,\/#!$%\^&\*;:{}=\-_`~()]+/g)
                 .filter(function(str){
                     return str != '';
                 });
-    if(words.length === 0){
-        return -2;
-    }
     return getPosScore(words);
 }
-/* take avg of avgs of positivity ratings of all words in sentence */
+/* take avg of avgs of positivity ratings (excluding 0s) of all words in a sentence */
 function getPosScore(words){
     let sum = 0
     let len=words.length;
-    for(let i = 0; i < len; i++)
-        sum+=getPositivityRatingAvg(words[i]);
-    return sum/len
+    let numNonZeroRatings=0;
+    for(let i = 0; i < len; i++){
+        let rating=getPositivityRatingAvg(words[i]);
+        sum+=rating;
+        if(rating!=0)numNonZeroRatings++;        
+    }
+    return numNonZeroRatings?sum/numNonZeroRatings:0;
 }
 /*Takes average of pos and neg scores for all definitions of a single word.
 This will be between 1 (completely positive) and -1 (completely negative).
-Ignores duplicate words (words with the same # value).
 This algorithm is just a starting point.*/
-function getPositivityRatingAvg(word){
+function getPositivityRatingAvg(word, type){
     let dictEntry = wordNet[word];
     if(!dictEntry) return 0;
-    let keys = Object.keys(dictEntry);
+    let posKeys = Object.keys(dictEntry); //part of speech keys
     let sum=0;
-    let len=keys.length;
+    let len=posKeys.length;
     for(let i = 0; i < len; i++){
-       sum+=parseFloat(dictEntry[keys[i]][0].p) - parseFloat(dictEntry[keys[i]][0].n);
+        let posObj=dictEntry[posKeys[i]];
+        let wordKeys=Object.keys(posObj);
+        let numKeys=wordKeys.length;
+        sum+=weightedAvgWordScore(posObj, wordKeys, numKeys);
     }
     return sum/len;
+}
+function weightedAvgWordScore(posObj, wordKeys, len){
+    let weightedScores = 0.0;
+    let weightSum = 0.0;
+    for(let i = 0; i < len; i++){
+        weightedScores+=(parseFloat(posObj[wordKeys[i]].p
+            -parseFloat(posObj[wordKeys[i]].n)))/(i+2);
+        weightSum+=1.0/(i+2); //sum of the weights applied to each score
+    }
+    return weightedScores/weightSum;
 }
 /*cuts string if it exceeds max chars*/
 function limitChars(s, lim){
