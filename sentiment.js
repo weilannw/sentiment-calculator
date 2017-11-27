@@ -7,12 +7,11 @@
  *     2010. <http://wordnet.princeton.edu>
  */
 var wordNet = require('./sentiWordNet.json');
-exports.charLimit = null;
 /* removes characters and whitespace from a sentence, gets posScore*/
 function evaluateSentence(sentence){
     if(typeof(sentence)!='string') return -2;
     var s = sentence.toLowerCase();
-    let words = s.split(/[ ,\/#!$%\^&\*;:{}=\-_`~()]+/g)
+    let words = s.split(/[ ,\/#!$%\^&\*;:{}=\-_`~().]+/g)
                 .filter(function(str){
                     return str != '';
                 });
@@ -57,28 +56,5 @@ function weightedAvgWordScore(posObj, wordKeys, len){
     }
     return weightedScores/weightSum;
 }
-/*cuts string if it exceeds max chars*/
-function limitChars(s, lim){
-    s = s.trim();
-    for(let i = 0, len = s.length; i < len; i++){
-        if(i == lim - 1){
-            let c = s.charAt(i);
-            if(c===' '){
-                s = s.substring(0, i);
-                return s;
-            }
-            else if(s.charAt(i + 1) != ' ')
-            {
-                return s.substring(0, findIndexOfLastWord(s, i)+1);
-            }
-        }
-    }
-}
-/*finds the index of the last word to cut the string at
-(avoids leaving behind parts of a word)*/
-function findIndexOfLastWord(s, curInd){
-    var index = 0;
-    for(index = curInd; (s.charAt(index) != ' ' && index > 0); index--);
-    return index;
-}
+
 exports.evaluateSentence = evaluateSentence;

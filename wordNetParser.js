@@ -12,13 +12,11 @@ var fs = require('fs');
 const READFILE = 'SentiWordNet_3.0.0_20130122.txt';
 const WRITEFILE = 'sentiWordNet.json';
 const STARTLINEIND = 885;
-const STARTIND = 11; //index of start of relevant data on each line
 const CHARINTERVAL = 500;
 var data = '';
 var wordNetDict = {};
 var rs = fs.createReadStream(READFILE, {start: STARTLINEIND});
 var ws = fs.createWriteStream(WRITEFILE);
-var stdout = process.stdout;
 
 function onReadable(){
     let res;
@@ -39,30 +37,28 @@ function handleData(chunk){
                    //chars after end of line
     }
     else
-        data = chunk;
+         data = chunk;
 }
-function parseLine(str){
+function parseLine(str){    
     if(str){
-        let data = str.slice(STARTIND).split('\t');
-        if(data.length >= 3){
-            addWordsToDict(data[0], data[1], data[2].split(' '));
-        }
+        let data = str.split('\t');
+        if(data.length >= 5 && data[0]!=='')
+            addWordsToDict(data[0], data[2], data[3], data[4].split(' '));
     }
  }
- function addWordsToDict(pos, neg, words){
-    let obj = {p: pos, n: neg};
+ function addWordsToDict(type, pos, neg, words){
+    let scores = {p: pos, n: neg};
     for(let i = 0, len = words.length; i < len; i++)
-        addWordToDict(obj, words[i].split('#'));
+        addWordToDict(type, scores, words[i].split('#'));
  }
- function addWordToDict(obj, wordData){
+ function addWordToDict(type, scoresObj, wordData){
     let word = wordData[0];
     let ind = wordData[1];
     if(!wordNetDict[word])
         wordNetDict[word]={};
-    if(!wordNetDict[word][ind])
-        wordNetDict[word][ind]=[obj];         
-    else
-        wordNetDict[word][ind].push(obj);
+    if(!wordNetDict[word][type])
+        wordNetDict[word][type]={};
+    wordNetDict[word][type][ind]=scoresObj;         
  }
 function run(){
     rs.on("readable", onReadable);
