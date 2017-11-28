@@ -1,4 +1,5 @@
-/* This code relies on a json file generated from
+/* Author: https://github.com/weilannw
+ * This code relies on a json file generated from
  * SentiWordNet_3.0.0_20130122.txt which was
  * retrieved from the following source:
  * 
@@ -8,8 +9,12 @@
  */
 var wordNet = require('./sentiWordNet.json');
 /* removes characters and whitespace from a sentence, gets posScore*/
+function errMsg(){
+    process.stderr.write("sentence undefined\n");
+    process.exit(-1);
+}
 function evaluateSentence(sentence){
-    if(typeof(sentence)!='string') return -2;
+    sentence = sentence?String(sentence):errMsg();
     var s = sentence.toLowerCase();
     let words = s.split(/[ ,\/#!$%\^&\*;:{}=\-_`~().]+/g)
                 .filter(function(str){

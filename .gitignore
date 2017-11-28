@@ -1,2 +1,3 @@
-*.txt
-*.json
+/sentiWordNet.json
+/SentiWordNet_3.0.0_20130122.txt
+/oldCode.txt

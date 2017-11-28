@@ -1,7 +1,8 @@
 var s = require('./sentiment');
 var stdin = process.stdin;
 var stdout = process.stdout;
-const PROMPT = "Enter a sentence to be given a positivity rating. (Enter '!' to exit)\n";
+const PROMPT = "Enter a sentence to be given a positivity rating (Enter '!' to exit)\n";
+if(process.argv)
 var processSentence = function(sentence){
     var sentence = String(sentence).substring(0, String(sentence).length-1);
     if(sentence === '!')
