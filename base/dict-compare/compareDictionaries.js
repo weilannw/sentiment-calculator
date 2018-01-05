@@ -7,43 +7,48 @@ const wordNet = require('../wordnet-dict/SentiWordNet');
 const corpus = require('../brill-tagger/corpus/corpusDict');  
 const morpho = require('../morpho/morphoUtil');
 const tagUtil = require('../morpho/tagUtil');
-var totalWords = 0;
+var totalWords = 0; //this will count all part of speech forms as unique
+var totalCompatibleWords = 0; //this will only regard wordnet part of speech forms as unique, and disregards non-wordnet forms
 var matches = 0;
 var ignored = 0;
 var nonMatches = '';
 var ws = fs.createWriteStream('non-matches.txt');
 compareAll();
 printOutput();
-function ignore(tag){
-    return (
-       !tagUtil.validPennTag(tag) ||
-       tag === 'NNP' ||
-       tagUtil.PUNCTUATION.includes(tag) || 
-       tagUtil.PENNONLYTAGS.includes(tag)
-    );
-}
 function compareAll(){
     let words = Object.keys(corpus);
     for(let i = 0, len = words.length; i < len; i++){
         let posKeys = Object.keys(corpus[words[i]]);
         totalWords += posKeys.length;
+        let wordNetPos = []; //stores the wordnet part of speeches of a word for calculating total # compatible words
         for(let ii = 0, len = posKeys.length; ii < len ; ii++){
-            if(ignore(posKeys[ii]))
-                ignored++;
-            else if(wordExistsInWordNet(words[i], posKeys[ii]))
-                matches++;
-            else
-                nonMatches+=words[i]+ ' ' + posKeys[ii] + ',\n';
+            let wordNetTag;
+            if(null!==(wordNetTag = tagUtil.pennToWordNet(posKeys[ii]))){
+                if(!wordNetPos.includes(wordNetTag)){
+                    wordNetPos.push(wordNetTag);
+                    totalCompatibleWords++;
+                    if(posKeys[ii]==='NNP') //ignore singular proper nouns
+                        ignored++;
+                    else if(wordExistsInWordNet(words[i], posKeys[ii]))
+                        matches++;
+                    else
+                        nonMatches+=words[i]+ ' ' + wordNetTag + '\n';
+                }
+            }
         }
     }
 }
 function printOutput(){
+    let remaining;
     process.stdout.write(
-        'total words in corpus:       ' + totalWords + '\n' +
-        'matches:                     ' + matches + '\n' +
-        'matches % of total:          ' + (matches / totalWords * 100) + '%\n' +
-        'ignored:                     ' + ignored + '\n' +
-        'ignored % of total:          ' + (ignored / totalWords * 100) + '%\n'
+        'total unique words in corpus:             ' + totalWords + '\n' +
+        'total unique wordnet-compatible words:    ' + totalCompatibleWords + '\n\n' +
+        'matches:                                  ' + matches + '\n' +
+        'matches % of total (compatible):          ' + (matches / totalCompatibleWords * 100) + '%\n\n' +
+        'ignored:                                  ' + ignored + '\n' +
+        'ignored % of total (compatible):          ' + (ignored / totalCompatibleWords * 100) + '%\n\n' +
+        'remaining:                                ' + (remaining = totalCompatibleWords-matches-ignored) + '\n' +
+        'remaining % of total (compatible):        ' + (remaining / totalCompatibleWords * 100) + '%\n\n' 
     );
     ws.write(nonMatches);
 }
