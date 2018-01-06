@@ -9,18 +9,18 @@
  *     2010. <http://wordnet.princeton.edu>
  */
 var fs = require('fs');
-const READFILE = 'SentiWordNet_3.0.0_20130122.txt';
-const WRITEFILE = 'sentiWordNet.json';
-const STARTLINEIND = 885;
-const CHARINTERVAL = 500;
+const readfile = 'SentiWordNet_3.0.0_20130122.txt';
+const writefile = 'sentiWordNet.json';
+const startlineind = 885;
+const charInterval = 500;
 var data = '';
 var wordNetDict = {};
-var rs = fs.createReadStream(READFILE, {start: STARTLINEIND});
-var ws = fs.createWriteStream(WRITEFILE);
+var rs = fs.createReadStream(readfile, {start: startlineind});
+var ws = fs.createWriteStream(writefile);
 
 function onReadable(){
     let res;
-    while(null!==(res = rs.read(CHARINTERVAL))){ 
+    while(null!==(res = rs.read(charInterval))){ 
         data+=String(res);
         if(data.indexOf('\n')!==-1)
            handleData(data);
@@ -60,9 +60,24 @@ function parseLine(str){
         wordNetDict[word][type]={};
     wordNetDict[word][type][ind]=scoresObj;         
  }
+ function convertLookupsToArrayIndices(dict){
+    let wordKeys = Object.keys(dict);
+    for(let i = 0, len = wordKeys.length; i < len; i++){
+        let posKeys = Object.keys(dict[wordKeys[i]]);
+        for(let ii = 0, len = posKeys.length; ii < len; ii++){
+            let defKeys = Object.keys(dict[wordKeys[i]][posKeys[ii]]);
+            let defArray = [];
+            for(let iii = 0, len = defKeys.length; iii < len; iii++){
+                defArray.push(dict[wordKeys[i]][posKeys[ii]][defKeys[iii]]);
+            }
+            dict[wordKeys[i]][posKeys[ii]] = defArray;
+        }
+    }
+ }
 function run(){
     rs.on("readable", onReadable);
     rs.on("end", ()=>{
+        convertLookupsToArrayIndices(wordNetDict);
         ws.write(JSON.stringify(wordNetDict, null, '\t'));
     });
 }
