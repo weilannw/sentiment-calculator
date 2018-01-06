@@ -41,11 +41,8 @@ function processVerb(word){
         return [word.slice(0, -2), word.slice(0, -3)];
     else if(endsWith(word, 'es') || endsWith(word, 'ed'))
         return [word.slice(0, -1), word.slice(0, -2)];
-    else if(endsWith(word, 'ss'))
-        return [word];
-    else if(endsWith(word, 'is'))
-        return [word];
-    else if(endsWith(word, 'us'))
+    else if(endsWith(word, 'ss') || endsWith(word, 'is') ||
+            endsWith(word, 'us'))
         return [word];
     else if(endsWith(word, 's'))
         return [word.slice(0, -1)];
@@ -65,11 +62,8 @@ function processNoun(word){
         return [word.slice(0, -3)+'y', word.slice(0, -1)];
     else if(endsWith(word, 'es'))
         return [word.slice(0, -1), word.slice(0, -2)];
-    else if(endsWith(word, 'ss'))
-        return [word];
-    else if(endsWith(word, 'is'))
-        return [word];
-    else if(endsWith(word, 'us'))
+    else if(endsWith(word, 'ss') || endsWith(word, 'is') ||
+            endsWith(word, 'us'))
         return [word];
     else if(endsWith(word, 's'))
         return [word.slice(0, -1)];
