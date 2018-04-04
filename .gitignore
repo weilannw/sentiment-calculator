@@ -3,3 +3,4 @@
 *.DS_Store
 *.dp
 *.sh
+base/tests/twitter_samples/
